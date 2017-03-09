@@ -1638,10 +1638,18 @@ METHOD(kernel_ipsec_t, add_sa, status_t,
 		}
 	}
 
-	if (this->socket_xfrm->send_ack(this->socket_xfrm, hdr) != SUCCESS)
+	status = this->socket_xfrm->send_ack(this->socket_xfrm, hdr);
+	if (status == NOT_FOUND && data->update)
 	{
-		DBG1(DBG_KNL, "unable to add SAD entry with SPI %.8x%s", ntohl(id->spi),
-			 markstr);
+		hdr->nlmsg_type = XFRM_MSG_NEWSA;
+		status = this->socket_xfrm->send_ack(this->socket_xfrm, hdr);
+	}
+
+	if (status != SUCCESS)
+	{
+		DBG1(DBG_KNL, "unable to add SAD entry with SPI %.8x%s (%N)", ntohl(id->spi),
+			 markstr, status_names, status);
+		status = FAILED;
 		goto failed;
 	}
 
