@@ -1641,6 +1641,7 @@ METHOD(kernel_ipsec_t, add_sa, status_t,
 	status = this->socket_xfrm->send_ack(this->socket_xfrm, hdr);
 	if (status == NOT_FOUND && data->update)
 	{
+		DBG1(DBG_KNL, "allocated SPI not found anymore, try to add SAD entry");
 		hdr->nlmsg_type = XFRM_MSG_NEWSA;
 		status = this->socket_xfrm->send_ack(this->socket_xfrm, hdr);
 	}
