@@ -37,4 +37,9 @@ public final class Constants
 	 */
 	public static final int MTU_MAX = 1500;
 	public static final int MTU_MIN = 1280;
+
+	/**
+	 * Preference key for Always-On VPN profile
+	 */
+	public static final String PREF_ALWAYS_ON_VPN_PROFILE = "pref_always_on_vpn_profile";
 }

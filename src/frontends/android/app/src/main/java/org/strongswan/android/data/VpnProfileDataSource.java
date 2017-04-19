@@ -17,10 +17,6 @@
 
 package org.strongswan.android.data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -29,6 +25,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class VpnProfileDataSource
 {
@@ -287,6 +287,28 @@ public class VpnProfileDataSource
 		}
 		cursor.close();
 		return profile;
+	}
+
+	/**
+	 * Get a single VPN profile from the database by its UUID as String.
+	 * @param uuid the UUID of the VPN profile as String
+	 * @return the profile or null, if not found
+	 */
+	public VpnProfile getVpnProfile(String uuid)
+	{
+		try
+		{
+			if (uuid != null)
+			{
+				return getVpnProfile(UUID.fromString(uuid));
+			}
+			return null;
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**

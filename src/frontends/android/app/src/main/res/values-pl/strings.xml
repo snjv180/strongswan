@@ -29,6 +29,10 @@
     <string name="profile_not_found">Nie znaleziono profilu</string>
     <string name="strongswan_shortcut">Skrót strongSwan</string>
 
+    <!-- Settings -->
+    <string name="pref_title">Settings</string>
+    <string name="pref_always_on_vpn_profile">Profile for Always-on VPN</string>
+
     <!-- Log view -->
     <string name="log_title">Log</string>
     <string name="send_log">Prześlij log</string>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2012-2015 Tobias Brunner
+    Copyright (C) 2012-2017 Tobias Brunner
     Copyright (C) 2012 Giuliano Grassi
     Copyright (C) 2012 Ralf Sager
-    Hochschule fuer Technik Rapperswil
+    HSR Hochschule fuer Technik Rapperswil
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
@@ -27,11 +27,11 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/ApplicationTheme"
-        android:allowBackup="false" >
+        android:allowBackup="false">
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/main_activity_name"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -42,25 +42,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.VpnProfileDetailActivity" >
+            android:name=".ui.VpnProfileDetailActivity">
         </activity>
         <activity
             android:name=".ui.TrustedCertificatesActivity"
-            android:label="@string/trusted_certs_title" >
+            android:label="@string/trusted_certs_title">
         </activity>
         <activity
             android:name=".ui.LogActivity"
-            android:label="@string/log_title" >
+            android:label="@string/log_title">
+        </activity>
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/pref_title">
         </activity>
         <activity
             android:name=".ui.RemediationInstructionsActivity"
-            android:label="@string/remediation_instructions_title" >
+            android:label="@string/remediation_instructions_title">
         </activity>
         <activity
             android:name=".ui.VpnProfileSelectActivity"
-            android:label="@string/strongswan_shortcut" >
+            android:label="@string/strongswan_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -68,7 +73,7 @@
             android:name=".ui.VpnProfileImportActivity"
             android:label="@string/profile_import"
             android:taskAffinity=""
-            android:excludeFromRecents="true" >
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -97,7 +102,7 @@
         <activity
             android:name=".ui.TrustedCertificateImportActivity"
             android:label="@string/import_certificate"
-            android:theme="@style/AlertDialogTheme" >
+            android:theme="@style/AlertDialogTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -110,12 +115,12 @@
 
         <service
             android:name=".logic.VpnStateService"
-            android:exported="false" >
+            android:exported="false">
         </service>
         <service
             android:name=".logic.CharonVpnService"
             android:exported="false"
-            android:permission="android.permission.BIND_VPN_SERVICE" >
+            android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
@@ -124,10 +129,12 @@
         <provider
             android:name=".data.LogContentProvider"
             android:authorities="org.strongswan.android.content.log"
-            android:exported="true" >
-            <!-- android:grantUriPermissions="true" combined with a custom permission does
+            android:exported="true">
+            <!--
+                 android:grantUriPermissions="true" combined with a custom permission does
                  not work (probably too many indirections with ACTION_SEND) so we secure
-                 this provider with a custom ticketing system -->
+                 this provider with a custom ticketing system
+            -->
         </provider>
     </application>
 
