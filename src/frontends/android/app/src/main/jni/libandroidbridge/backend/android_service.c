@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2016 Tobias Brunner
+ * Copyright (C) 2010-2017 Tobias Brunner
  * Copyright (C) 2012 Giuliano Grassi
  * Copyright (C) 2012 Ralf Sager
  * HSR Hochschule fuer Technik Rapperswil
@@ -582,7 +582,9 @@ METHOD(listener_t, alert, bool,
 			}
 			case ALERT_PEER_INIT_UNREACHABLE:
 				this->lock->read_lock(this->lock);
-				if (this->tunfd < 0)
+				if (this->tunfd < 0 &&
+					!this->settings->get_bool(this->settings,
+											  "connection.alwayson", FALSE))
 				{
 					uint32_t *id = malloc_thing(uint32_t);
 

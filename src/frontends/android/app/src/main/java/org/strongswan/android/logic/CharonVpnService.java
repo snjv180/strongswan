@@ -83,6 +83,7 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 	private volatile boolean mTerminate;
 	private volatile boolean mIsDisconnecting;
 	private volatile boolean mShowNotification;
+	private volatile boolean mAlwaysOn;
 	private VpnStateService mService;
 	private final Object mServiceLock = new Object();
 	private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -125,11 +126,13 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 		if (intent != null)
 		{
 			VpnProfile profile = null;
+			mAlwaysOn = false;
 
 			if (VPN_SERVICE_ACTION.equals(intent.getAction()))
 			{	/* triggered when Always-on VPN is activated */
 				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 				profile = mDataSource.getVpnProfile(pref.getString(Constants.PREF_ALWAYS_ON_VPN_PROFILE, null));
+				mAlwaysOn = true;
 			}
 			else if (!DISCONNECT_ACTION.equals(intent.getAction()))
 			{
@@ -267,6 +270,7 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 							writer.setValue("connection.password", mCurrentProfile.getPassword());
 							writer.setValue("connection.local_id", mCurrentProfile.getLocalId());
 							writer.setValue("connection.remote_id", mCurrentProfile.getRemoteId());
+							writer.setValue("connection.alwayson", mAlwaysOn);
 							initiate(writer.serialize());
 						}
 						else
