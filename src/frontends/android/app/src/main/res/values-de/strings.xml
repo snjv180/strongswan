@@ -149,6 +149,7 @@
     <string name="error_auth_failed">Benutzerauthentifizierung ist fehlgeschlagen.</string>
     <string name="error_assessment_failed">Sicherheitsassessment ist fehlgeschlagen.</string>
     <string name="error_generic">Unbekannter Fehler während des Verbindens.</string>
+    <string name="error_password_missing">VPN kann ohne Passwort nicht initiiert werden.</string>
     <string name="vpn_connected">VPN verbunden</string>
     <string name="vpn_profile_connected">Dieses VPN Profil ist momentan verbunden!</string>
     <string name="reconnect">Neu verbinden</string>

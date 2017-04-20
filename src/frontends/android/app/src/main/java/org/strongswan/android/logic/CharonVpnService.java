@@ -238,10 +238,19 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 						mIsDisconnecting = false;
 
 						addNotification();
+
 						BuilderAdapter builder = new BuilderAdapter(mCurrentProfile.getName(), mCurrentProfile.getSplitTunneling());
 						if (initializeCharon(builder, mLogFile, mCurrentProfile.getVpnType().has(VpnTypeFeature.BYOD)))
 						{
 							Log.i(TAG, "charon started");
+
+							if (mCurrentProfile.getVpnType().has(VpnTypeFeature.USER_PASS) &&
+								mCurrentProfile.getPassword() == null)
+							{	/* this can happen if Always-on VPN is enabled with an incomplete profile */
+								setError(ErrorState.PASSWORD_MISSING);
+								continue;
+							}
+
 							SettingsWriter writer = new SettingsWriter();
 							writer.setValue("global.language", Locale.getDefault().getLanguage());
 							writer.setValue("global.mtu", mCurrentProfile.getMTU());

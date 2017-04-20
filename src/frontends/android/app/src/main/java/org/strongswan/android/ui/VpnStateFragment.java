@@ -285,6 +285,9 @@ public class VpnStateFragment extends Fragment implements VpnStateListener
 			case UNREACHABLE:
 				showErrorDialog(R.string.error_unreachable);
 				break;
+			case PASSWORD_MISSING:
+				showErrorDialog(R.string.error_password_missing);
+				break;
 			default:
 				showErrorDialog(R.string.error_generic);
 				break;

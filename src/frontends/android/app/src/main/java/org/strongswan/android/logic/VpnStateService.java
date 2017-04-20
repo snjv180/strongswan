@@ -60,6 +60,7 @@ public class VpnStateService extends Service
 		LOOKUP_FAILED,
 		UNREACHABLE,
 		GENERIC_ERROR,
+		PASSWORD_MISSING,
 	}
 
 	/**

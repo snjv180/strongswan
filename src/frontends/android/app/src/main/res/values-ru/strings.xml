@@ -146,6 +146,7 @@
     <string name="error_auth_failed">Ошибка авторизации пользователя.</string>
     <string name="error_assessment_failed">Security assessment failed.</string>
     <string name="error_generic">Неизвестная ошибка.</string>
+    <string name="error_password_missing">Unable to initiate VPN without a password.</string>
     <string name="vpn_connected">Соединение с VPN установлено</string>
     <string name="vpn_profile_connected">Подключение к этому профилю VPN уже существует!</string>
     <string name="reconnect">Переподключить</string>
