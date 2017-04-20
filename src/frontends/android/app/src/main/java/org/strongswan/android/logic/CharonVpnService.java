@@ -612,17 +612,32 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 	 */
 	private byte[][] getUserCertificate() throws KeyChainException, InterruptedException, CertificateEncodingException
 	{
-		ArrayList<byte[]> encodings = new ArrayList<byte[]>();
-		X509Certificate[] chain = KeyChain.getCertificateChain(getApplicationContext(), mCurrentUserCertificateAlias);
-		if (chain == null || chain.length == 0)
+		while (true)
 		{
-			return null;
+			try
+			{
+				ArrayList<byte[]> encodings = new ArrayList<byte[]>();
+				X509Certificate[] chain = KeyChain.getCertificateChain(getApplicationContext(), mCurrentUserCertificateAlias);
+				if (chain == null || chain.length == 0)
+				{
+					return null;
+				}
+				for (X509Certificate cert : chain)
+				{
+					encodings.add(cert.getEncoded());
+				}
+				return encodings.toArray(new byte[encodings.size()][]);
+			}
+			catch (KeyChainException ex)
+			{
+				if (!mAlwaysOn)
+				{
+					throw ex;
+				}
+				Log.d(TAG, "=== failed to retrieve cert chain, retrying");
+				Thread.sleep(2500);
+			}
 		}
-		for (X509Certificate cert : chain)
-		{
-			encodings.add(cert.getEncoded());
-		}
-		return encodings.toArray(new byte[encodings.size()][]);
 	}
 
 	/**
@@ -638,7 +653,22 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 	 */
 	private PrivateKey getUserKey() throws KeyChainException, InterruptedException
 	{
-		return KeyChain.getPrivateKey(getApplicationContext(), mCurrentUserCertificateAlias);
+		while (true)
+		{
+			try
+			{
+				return KeyChain.getPrivateKey(getApplicationContext(), mCurrentUserCertificateAlias);
+			}
+			catch (KeyChainException ex)
+			{
+				if (!mAlwaysOn)
+				{
+					throw ex;
+				}
+				Log.d(TAG, "=== failed to retrieve private key, retrying");
+				Thread.sleep(2500);
+			}
+		}
 	}
 
 	/**
