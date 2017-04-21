@@ -817,6 +817,16 @@ public class CharonVpnService extends VpnService implements Runnable, VpnStateSe
 			return fd.detachFd();
 		}
 
+		public synchronized int establishFilter()
+		{
+			/* just choose some arbitrary values to block all traffic */
+			mCache.addAddress("172.16.252.1", 32);
+			mCache.addAddress("fd00::fd02:1", 128);
+			mCache.addRoute("0.0.0.0", 0);
+			mCache.addRoute("::", 0);
+			return establish();
+		}
+
 		public synchronized int establishNoDns()
 		{
 			ParcelFileDescriptor fd;

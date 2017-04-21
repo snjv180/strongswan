@@ -257,6 +257,25 @@ static bool add_routes(vpnservice_builder_t *builder, child_sa_t *child_sa)
 }
 
 /**
+ * Register callbacks related to the TUN devices
+ */
+static void register_tun_callbacks(private_android_service_t *this)
+{
+	charon->receiver->add_esp_cb(charon->receiver,
+							(receiver_esp_cb_t)receiver_esp_cb, NULL);
+	ipsec->processor->register_inbound(ipsec->processor,
+								  (ipsec_inbound_cb_t)deliver_plain, this);
+	ipsec->processor->register_outbound(ipsec->processor,
+								   (ipsec_outbound_cb_t)send_esp, NULL);
+	this->dns_proxy->register_cb(this->dns_proxy,
+							(dns_proxy_response_cb_t)deliver_plain, this);
+
+	lib->processor->queue_job(lib->processor,
+		(job_t*)callback_job_create((callback_job_cb_t)handle_plain, this,
+								NULL, (callback_job_cancel_t)return_false));
+}
+
+/**
  * Setup a new TUN device for the supplied SAs, also queues a job that
  * reads packets from this device.
  * Additional information such as DNS servers are gathered in appropriate
@@ -321,18 +340,52 @@ static bool setup_tun_device(private_android_service_t *this,
 
 	if (!already_registered)
 	{
-		charon->receiver->add_esp_cb(charon->receiver,
-								(receiver_esp_cb_t)receiver_esp_cb, NULL);
-		ipsec->processor->register_inbound(ipsec->processor,
-									  (ipsec_inbound_cb_t)deliver_plain, this);
-		ipsec->processor->register_outbound(ipsec->processor,
-									   (ipsec_outbound_cb_t)send_esp, NULL);
-		this->dns_proxy->register_cb(this->dns_proxy,
-								(dns_proxy_response_cb_t)deliver_plain, this);
+		register_tun_callbacks(this);
+	}
+	return TRUE;
+}
 
-		lib->processor->queue_job(lib->processor,
-			(job_t*)callback_job_create((callback_job_cb_t)handle_plain, this,
-									NULL, (callback_job_cancel_t)return_false));
+
+/**
+ * Setup a new TUN device that filters all traffic until we have the SA
+ * established.
+ */
+static bool setup_tun_device_filter(private_android_service_t *this)
+{
+	vpnservice_builder_t *builder;
+	bool already_registered = FALSE;
+	int tunfd;
+
+	DBG1(DBG_DMN, "setting up TUN device to filter traffic");
+
+	builder = charonservice->get_vpnservice_builder(charonservice);
+
+	if (!builder->set_mtu(builder, this->mtu))
+	{
+		return FALSE;
+	}
+
+	tunfd = builder->establish_filter(builder);
+	if (tunfd == -1)
+	{
+		return FALSE;
+	}
+
+	this->lock->write_lock(this->lock);
+	if (this->tunfd > 0)
+	{	/* close previously opened TUN device */
+		close(this->tunfd);
+		already_registered = true;
+	}
+	this->tunfd = tunfd;
+	this->use_dns_proxy = TRUE;
+	this->lock->unlock(this->lock);
+
+	DBG1(DBG_DMN, "successfully created TUN device");
+
+	if (!already_registered)
+	{
+		register_tun_callbacks(this);
 	}
 	return TRUE;
 }
@@ -582,9 +635,7 @@ METHOD(listener_t, alert, bool,
 			}
 			case ALERT_PEER_INIT_UNREACHABLE:
 				this->lock->read_lock(this->lock);
-				if (this->tunfd < 0 &&
-					!this->settings->get_bool(this->settings,
-											  "connection.alwayson", FALSE))
+				if (this->tunfd < 0)
 				{
 					uint32_t *id = malloc_thing(uint32_t);
 
@@ -900,6 +951,11 @@ android_service_t *android_service_create(android_creds_t *creds,
 			this->settings->get_str(this->settings, "connection.server", NULL));
 
 	charon->bus->add_listener(charon->bus, &this->public.listener);
+
+	if (settings->get_bool(settings, "connection.alwayson", FALSE))
+	{
+		setup_tun_device_filter(this);
+	}
 
 	lib->processor->queue_job(lib->processor,
 		(job_t*)callback_job_create((callback_job_cb_t)initiate, this,

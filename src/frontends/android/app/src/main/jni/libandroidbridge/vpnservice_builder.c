@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012-2014 Tobias Brunner
+ * Copyright (C) 2012-2017 Tobias Brunner
  * Copyright (C) 2012 Giuliano Grassi
  * Copyright (C) 2012 Ralf Sager
- * Hochschule fuer Technik Rapperswil
+ * HSR Hochschule fuer Technik Rapperswil
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -237,6 +237,12 @@ METHOD(vpnservice_builder_t, establish, int,
 	return establish_internal(this, "establish");
 }
 
+METHOD(vpnservice_builder_t, establish_filter, int,
+	private_vpnservice_builder_t *this)
+{
+	return establish_internal(this, "establishFilter");
+}
+
 METHOD(vpnservice_builder_t, establish_no_dns, int,
 	private_vpnservice_builder_t *this)
 {
@@ -266,6 +272,7 @@ vpnservice_builder_t *vpnservice_builder_create(jobject builder)
 			.add_dns = _add_dns,
 			.set_mtu = _set_mtu,
 			.establish = _establish,
+			.establish_filter = _establish_filter,
 			.establish_no_dns = _establish_no_dns,
 			.destroy = _destroy,
 		},

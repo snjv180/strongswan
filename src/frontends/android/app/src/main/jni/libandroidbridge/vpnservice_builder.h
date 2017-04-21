@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2012-2014 Tobias Brunner
+ * Copyright (C) 2012-2017 Tobias Brunner
  * Copyright (C) 2012 Giuliano Grassi
  * Copyright (C) 2012 Ralf Sager
- * Hochschule fuer Technik Rapperswil
+ * HSR Hochschule fuer Technik Rapperswil
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -76,6 +76,13 @@ struct vpnservice_builder_t {
 	 * @return					the TUN file descriptor, -1 if failed
 	 */
 	int (*establish)(vpnservice_builder_t *this);
+
+	/**
+	 * Build the TUN device for filtering traffic
+	 *
+	 * @return					the TUN file descriptor, -1 if failed
+	 */
+	int (*establish_filter)(vpnservice_builder_t *this);
 
 	/**
 	 * Build the TUN device without DNS related data
