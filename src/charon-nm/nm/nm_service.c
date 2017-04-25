@@ -283,9 +283,11 @@ static gboolean connect_(NMVPNPlugin *plugin, NMConnection *connection,
 	NMStrongswanPluginPrivate *priv;
 	NMSettingConnection *conn;
 	NMSettingVPN *vpn;
+	enumerator_t *enumerator;
 	identification_t *user = NULL, *gateway = NULL;
-	const char *address, *str;
-	bool virtual, encap;
+	const char *address, *str, *proposals;
+	proposal_t *proposal;
+	bool virtual, encap, proposal_added = FALSE;
 	ike_cfg_t *ike_cfg;
 	peer_cfg_t *peer_cfg;
 	child_cfg_t *child_cfg;
@@ -540,8 +542,27 @@ static gboolean connect_(NMVPNPlugin *plugin, NMConnection *connection,
 							 charon->socket->get_port(charon->socket, FALSE),
 							(char*)address, IKEV2_UDP_PORT,
 							 FRAGMENTATION_YES, 0);
-	ike_cfg->add_proposal(ike_cfg, proposal_create_default(PROTO_IKE));
-	ike_cfg->add_proposal(ike_cfg, proposal_create_default_aead(PROTO_IKE));
+	proposals = lib->settings->get_str(lib->settings, "charon-nm.ike_proposals",
+									   NULL);
+	if (proposals)
+	{
+		enumerator = enumerator_create_token(proposals, ",", " ");
+		while (enumerator->enumerate(enumerator, &str))
+		{
+			proposal = proposal_create_from_string(PROTO_IKE, str);
+			if (proposal)
+			{
+				ike_cfg->add_proposal(ike_cfg, proposal);
+				proposal_added = TRUE;
+			}
+		}
+		enumerator->destroy(enumerator);
+	}
+	if (!proposal_added)
+	{
+		ike_cfg->add_proposal(ike_cfg, proposal_create_default(PROTO_IKE));
+		ike_cfg->add_proposal(ike_cfg, proposal_create_default_aead(PROTO_IKE));
+	}
 
 	peer_cfg = peer_cfg_create(priv->name, ike_cfg, &peer);
 	if (virtual)
@@ -566,8 +587,30 @@ static gboolean connect_(NMVPNPlugin *plugin, NMConnection *connection,
 	peer_cfg->add_auth_cfg(peer_cfg, auth, FALSE);
 
 	child_cfg = child_cfg_create(priv->name, &child);
-	child_cfg->add_proposal(child_cfg, proposal_create_default(PROTO_ESP));
-	child_cfg->add_proposal(child_cfg, proposal_create_default_aead(PROTO_ESP));
+	proposals = lib->settings->get_str(lib->settings, "charon-nm.esp_proposals",
+									   NULL);
+	proposal_added = FALSE;
+	if (proposals)
+	{
+		enumerator = enumerator_create_token(proposals, ",", " ");
+		while (enumerator->enumerate(enumerator, &str))
+		{
+			proposal = proposal_create_from_string(PROTO_ESP, str);
+			if (proposal)
+			{
+				child_cfg->add_proposal(child_cfg, proposal);
+				proposal_added = TRUE;
+			}
+		}
+		enumerator->destroy(enumerator);
+	}
+	if (!proposal_added)
+	{
+		child_cfg->add_proposal(child_cfg,
+								proposal_create_default(PROTO_ESP));
+		child_cfg->add_proposal(child_cfg,
+								proposal_create_default_aead(PROTO_ESP));
+	}
 	ts = traffic_selector_create_dynamic(0, 0, 65535);
 	child_cfg->add_traffic_selector(child_cfg, TRUE, ts);
 	ts = traffic_selector_create_from_string(0, TS_IPV4_ADDR_RANGE,

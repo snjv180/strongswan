@@ -1,3 +1,9 @@
 charon-nm.ca_dir = <default>
 	Directory from which to load CA certificates if no certificate is
 	configured.
+
+charon-nm.esp_proposals = <default>
+	Comma separated list of ESP proposals to offer to the server.
+
+charon-nm.ike_proposals = <default>
+	Comma separated list of IKE proposals to offer to the server.
